@@ -1,57 +1,15 @@
 defmodule Sudoku do
-  @moduledoc """
-  Sudoku solver using depth-first search (backtracking algorithm).
-  """
+  def solve2(grid) when is_list(grid) do
+    solve(grid)
+  end
 
-  @doc """
-  Solves a sudoku puzzle using depth-first search.
-
-  Receives a 9x9 grid as a list of lists where:
-  - 0 or nil represents an empty cell
-  - 1-9 represents a filled cell
-
-  Returns the solved sudoku if a solution exists, nil otherwise.
-
-  ## Examples
-
-      iex> puzzle = [
-      ...>   [5, 3, 0, 0, 7, 0, 0, 0, 0],
-      ...>   [6, 0, 0, 1, 9, 5, 0, 0, 0],
-      ...>   [0, 9, 8, 0, 0, 0, 0, 6, 0],
-      ...>   [8, 0, 0, 0, 6, 0, 0, 0, 3],
-      ...>   [4, 0, 0, 8, 0, 3, 0, 0, 1],
-      ...>   [7, 0, 0, 0, 2, 0, 0, 0, 6],
-      ...>   [0, 6, 0, 0, 0, 0, 2, 8, 0],
-      ...>   [0, 0, 0, 4, 1, 9, 0, 0, 5],
-      ...>   [0, 0, 0, 0, 8, 0, 0, 7, 9]
-      ...> ]
-      iex> solution = Sudoku.solve(puzzle)
-      iex> solution != nil
-      true
-
-  """
   def solve(grid) when is_list(grid) do
-    grid
-    |> normalize_grid()
-    |> dfs_solve()
-  end
-
-  # Normalizes the grid: converts nil to 0 and ensures proper format
-  defp normalize_grid(grid) do
-    Enum.map(grid, fn row ->
-      Enum.map(row, fn cell -> if cell == nil, do: 0, else: cell end)
-    end)
-  end
-
-  # Depth-first search solver using backtracking
-  defp dfs_solve(grid) do
     case find_empty_cell(grid) do
-      nil -> grid  # No empty cells, puzzle is solved
+      nil -> grid 
       {row, col} -> try_values(grid, row, col, 1)
     end
   end
 
-  # Finds the next empty cell (value 0)
   defp find_empty_cell(grid) do
     grid
     |> Enum.with_index()
@@ -72,7 +30,7 @@ defmodule Sudoku do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
 
       # Recurse with DFS
-      case dfs_solve(new_grid) do
+      case solve(new_grid) do
         nil -> try_values(grid, row, col, num + 1)  # Backtrack: try next number
         solved -> solved  # Solution found
       end
@@ -83,7 +41,8 @@ defmodule Sudoku do
   end
 
 
-  # validation moves
+  # --------------------- validation functions ------------------------
+
   defp valid_move?(grid, row, col, num) do
     valid_in_row?(grid, row, num) and
       valid_in_col?(grid, col, num) and
