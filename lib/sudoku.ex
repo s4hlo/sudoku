@@ -1,8 +1,8 @@
 defmodule Sudoku do
   def solve(grid) when is_list(grid) do
     case find_empty_cell(grid) do
-      nil -> grid 
-      {row, col} -> try_values(grid, row, col, 1) # can be nil
+      nil -> grid
+      {row, col} -> try_values(grid, row, col, 1)
     end
   end
 
@@ -24,14 +24,13 @@ defmodule Sudoku do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
 
       case solve(new_grid) do
-        nil -> try_values(grid, row, col, num + 1)  # Backtrack
-        solved -> solved  
+        nil -> try_values(grid, row, col, num + 1)
+        solved -> solved
       end
     else
       try_values(grid, row, col, num + 1)
     end
   end
-
 
   # --------------------- validation functions ------------------------
 
