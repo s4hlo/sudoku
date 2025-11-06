@@ -1,11 +1,17 @@
 defmodule Sudoku do
+  # def solve2(grid) when is_list(grid) do
+  #   solve(grid)
+  # end
+
+  # Returns: a solved grid (list of lists) or nil if no solution exists
   def solve(grid) when is_list(grid) do
     case find_empty_cell(grid) do
       nil -> grid 
-      {row, col} -> try_values(grid, row, col, 1) # can be nil
+      {row, col} -> try_values(grid, row, col, 1)
     end
   end
 
+  # Returns: {row, col} tuple or nil if no empty cell found
   defp find_empty_cell(grid) do
     grid
     |> Enum.with_index()
@@ -17,15 +23,17 @@ defmodule Sudoku do
     end)
   end
 
+  # Returns: a solved grid (list of lists) or nil if no solution found
   defp try_values(_grid, _row, _col, num) when num > 9, do: nil
 
+  # Returns: a solved grid (list of lists) or nil if no solution found
   defp try_values(grid, row, col, num) do
     if valid_move?(grid, row, col, num) do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
 
       case solve(new_grid) do
-        nil -> try_values(grid, row, col, num + 1)  # Backtrack
-        solved -> solved  
+        nil -> try_values(grid, row, col, num + 1)  # Backtrack: try next number
+        solved -> solved  # Solution found
       end
     else
       try_values(grid, row, col, num + 1)
