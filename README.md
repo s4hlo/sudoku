@@ -1,6 +1,6 @@
 # Sudoku
 
-Sudoku solver using depth-first search (backtracking algorithm). Solves 9x9 sudoku puzzles.
+Sudoku solver supporting multiple solving algorithms. Currently implements backtracking (depth-first search). Supports various grid sizes (4x4, 9x9, 16x16, etc.).
 
 ## Installation
 
@@ -37,6 +37,8 @@ iex -S mix
 
 Then you can use the solver:
 
+### Using the default solver (backtracking)
+
 ```elixir
 puzzle = [
   [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -52,6 +54,17 @@ puzzle = [
 
 Sudoku.solve(puzzle)
 ```
+
+### Using a specific solver
+
+```elixir
+# Explicitly use backtracking solver
+Sudoku.solve(puzzle, Sudoku.Backtracking)
+```
+
+## Solvers
+
+- **Backtracking** (`Sudoku.Backtracking`) - Depth-first search with backtracking algorithm
 
 ### Format code
 

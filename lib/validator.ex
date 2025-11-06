@@ -30,7 +30,7 @@ defmodule Validator do
 
   def is_valid_solution?(grid) do
     grid_size = length(grid)
-    box_size = calculate_box_size(grid_size)
+    box_size = Utils.calculate_box_size(grid_size)
     max_num = grid_size
 
     all_filled?(grid) and
@@ -39,9 +39,6 @@ defmodule Validator do
       all_boxes_valid?(grid, box_size, max_num)
   end
 
-  defp calculate_box_size(grid_size) do
-    trunc(:math.sqrt(grid_size))
-  end
 
   defp all_filled?(grid) do
     Enum.all?(grid, fn row ->
