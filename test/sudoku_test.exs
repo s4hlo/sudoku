@@ -55,4 +55,64 @@ defmodule SudokuTest do
     solution = Sudoku.solve(solved)
     assert solution == solved
   end
+
+  test "solves 4x4 sudoku with 2x2 boxes" do
+    # Valid 4x4 puzzle with 2x2 boxes
+    puzzle = [
+      [1, 2, 0, 0],
+      [3, 4, 0, 0],
+      [0, 0, 2, 1],
+      [0, 0, 4, 3]
+    ]
+
+    solution = Sudoku.solve(puzzle)
+
+    assert solution != nil
+    assert Validator.is_valid_solution?(solution)
+    assert length(solution) == 4
+    assert length(hd(solution)) == 4
+  end
+
+  @tag timeout: 300_000
+  test "solves 16x16 sudoku with 4x4 boxes" do
+    # A simpler 16x16 puzzle with more clues for faster solving
+    puzzle = [
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      [5, 6, 7, 8, 1, 2, 3, 4, 13, 14, 15, 16, 9, 10, 11, 12],
+      [9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8],
+      [13, 14, 15, 16, 9, 10, 11, 12, 5, 6, 7, 8, 1, 2, 3, 4],
+      [2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15],
+      [6, 5, 8, 7, 2, 1, 4, 3, 14, 13, 16, 15, 10, 9, 12, 11],
+      [10, 9, 12, 11, 14, 13, 16, 15, 2, 1, 4, 3, 6, 5, 8, 7],
+      [14, 13, 16, 15, 10, 9, 12, 11, 6, 5, 8, 7, 2, 1, 4, 3],
+      [3, 4, 1, 2, 7, 8, 5, 6, 11, 12, 9, 10, 15, 16, 13, 14],
+      [7, 8, 5, 6, 3, 4, 1, 2, 15, 16, 13, 14, 11, 12, 9, 10],
+      [11, 12, 9, 10, 15, 16, 13, 14, 3, 4, 1, 2, 7, 8, 5, 6],
+      [15, 16, 13, 14, 11, 12, 9, 10, 7, 8, 5, 6, 3, 4, 1, 2],
+      [4, 3, 2, 1, 8, 7, 6, 5, 12, 11, 10, 9, 16, 15, 14, 13],
+      [8, 7, 6, 5, 4, 3, 2, 1, 16, 15, 14, 13, 12, 11, 10, 9],
+      [12, 11, 10, 9, 16, 15, 14, 13, 4, 3, 2, 1, 8, 7, 6, 5],
+      [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    ]
+
+    # Convert to puzzle format (replace some values with 0)
+    puzzle_with_blanks =
+      puzzle
+      |> Enum.with_index()
+      |> Enum.map(fn {row, row_idx} ->
+        row
+        |> Enum.with_index()
+        |> Enum.map(fn {val, col_idx} ->
+          # Keep about 30% of values as clues
+          if rem(row_idx * 16 + col_idx, 3) == 0, do: val, else: 0
+        end)
+      end)
+
+    solution = Sudoku.solve(puzzle_with_blanks)
+
+    assert solution != nil
+    assert Validator.is_valid_solution?(solution)
+    assert length(solution) == 16
+    assert length(hd(solution)) == 16
+  end
 end

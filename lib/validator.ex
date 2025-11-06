@@ -29,10 +29,18 @@ defmodule Validator do
   end
 
   def is_valid_solution?(grid) do
+    grid_size = length(grid)
+    box_size = calculate_box_size(grid_size)
+    max_num = grid_size
+
     all_filled?(grid) and
-      all_rows_valid?(grid) and
-      all_cols_valid?(grid) and
-      all_boxes_valid?(grid)
+      all_rows_valid?(grid, max_num) and
+      all_cols_valid?(grid, grid_size, max_num) and
+      all_boxes_valid?(grid, box_size, max_num)
+  end
+
+  defp calculate_box_size(grid_size) do
+    trunc(:math.sqrt(grid_size))
   end
 
   defp all_filled?(grid) do
@@ -41,32 +49,34 @@ defmodule Validator do
     end)
   end
 
-  defp all_rows_valid?(grid) do
+  defp all_rows_valid?(grid, max_num) do
     Enum.all?(grid, fn row ->
-      Enum.sort(row) == Enum.to_list(1..9)
+      Enum.sort(row) == Enum.to_list(1..max_num)
     end)
   end
 
-  defp all_cols_valid?(grid) do
-    Enum.all?(0..8, fn col ->
+  defp all_cols_valid?(grid, grid_size, max_num) do
+    Enum.all?(0..(grid_size - 1), fn col ->
       col_data = Enum.map(grid, &Enum.at(&1, col))
-      Enum.sort(col_data) == Enum.to_list(1..9)
+      Enum.sort(col_data) == Enum.to_list(1..max_num)
     end)
   end
 
-  defp all_boxes_valid?(grid) do
-    Enum.all?(0..2, fn box_row ->
-      Enum.all?(0..2, fn box_col ->
-        start_row = box_row * 3
-        start_col = box_col * 3
+  defp all_boxes_valid?(grid, box_size, max_num) do
+    num_boxes = div(length(grid), box_size)
+
+    Enum.all?(0..(num_boxes - 1), fn box_row ->
+      Enum.all?(0..(num_boxes - 1), fn box_col ->
+        start_row = box_row * box_size
+        start_col = box_col * box_size
 
         box_data =
-          for r <- start_row..(start_row + 2),
-              c <- start_col..(start_col + 2) do
+          for r <- start_row..(start_row + box_size - 1),
+              c <- start_col..(start_col + box_size - 1) do
             grid |> Enum.at(r) |> Enum.at(c)
           end
 
-        Enum.sort(box_data) == Enum.to_list(1..9)
+        Enum.sort(box_data) == Enum.to_list(1..max_num)
       end)
     end)
   end
