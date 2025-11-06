@@ -1,4 +1,33 @@
 defmodule Validator do
+  def valid_move?(grid, row, col, num, box_size) do
+    valid_in_row?(grid, row, num) and
+      valid_in_col?(grid, col, num) and
+      valid_in_box?(grid, row, col, num, box_size)
+  end
+
+  defp valid_in_row?(grid, row, num) do
+    row_data = Enum.at(grid, row)
+    not Enum.member?(row_data, num)
+  end
+
+  defp valid_in_col?(grid, col, num) do
+    col_data = Enum.map(grid, &Enum.at(&1, col))
+    not Enum.member?(col_data, num)
+  end
+
+  defp valid_in_box?(grid, row, col, num, box_size) do
+    box_start_row = div(row, box_size) * box_size
+    box_start_col = div(col, box_size) * box_size
+
+    box_data =
+      for r <- box_start_row..(box_start_row + box_size - 1),
+          c <- box_start_col..(box_start_col + box_size - 1) do
+        grid |> Enum.at(r) |> Enum.at(c)
+      end
+
+    not Enum.member?(box_data, num)
+  end
+
   def is_valid_solution?(grid) do
     all_filled?(grid) and
       all_rows_valid?(grid) and
