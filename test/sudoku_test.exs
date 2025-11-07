@@ -115,4 +115,58 @@ defmodule SudokuTest do
     assert length(solution) == 16
     assert length(hd(solution)) == 16
   end
+
+  describe "Algorithm X solver" do
+    test "solves a valid sudoku puzzle using Algorithm X" do
+      puzzle = [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+      ]
+
+      solution = Sudoku.solve(puzzle, Sudoku.AlgorithmX)
+
+      assert solution != nil
+      assert Validator.is_valid_solution?(solution)
+    end
+
+    test "returns nil for unsolvable puzzle using Algorithm X" do
+      invalid_puzzle = [
+        [5, 5, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+      ]
+
+      solution = Sudoku.solve(invalid_puzzle, Sudoku.AlgorithmX)
+      assert solution == nil
+    end
+
+    test "solves 4x4 sudoku using Algorithm X" do
+      puzzle = [
+        [1, 2, 0, 0],
+        [3, 4, 0, 0],
+        [0, 3, 2, 1],
+        [0, 0, 4, 3]
+      ]
+
+      solution = Sudoku.solve(puzzle, Sudoku.AlgorithmX)
+
+      assert solution != nil
+      assert Validator.is_valid_solution?(solution)
+      assert length(solution) == 4
+      assert length(hd(solution)) == 4
+    end
+  end
 end
