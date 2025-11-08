@@ -1,4 +1,40 @@
 defmodule Validator do
+
+  def valid_initial_grid?(grid, grid_size, box_size) do
+    # Check each filled cell to ensure it doesn't violate constraints
+    Enum.all?(0..(grid_size - 1), fn row ->
+      Enum.all?(0..(grid_size - 1), fn col ->
+        value = grid |> Enum.at(row) |> Enum.at(col)
+        
+        # Empty cells (0 or nil) are always valid
+        if value == 0 or value == nil do
+          true
+        else
+          # Temporarily remove this cell's value to check if placing it is valid
+          temp_grid = remove_cell_value(grid, row, col)
+          Validator.valid_move?(temp_grid, row, col, value, box_size)
+        end
+      end)
+    end)
+  end
+
+  # Remove a cell's value from the grid (set to 0) for validation purposes
+  defp remove_cell_value(grid, row, col) do
+    grid
+    |> Enum.with_index()
+    |> Enum.map(fn {row_data, r} ->
+      if r == row do
+        row_data
+        |> Enum.with_index()
+        |> Enum.map(fn {cell_value, c} ->
+          if c == col, do: 0, else: cell_value
+        end)
+      else
+        row_data
+      end
+    end)
+  end
+
   def valid_move?(grid, row, col, num, box_size) do
     valid_in_row?(grid, row, num) and
       valid_in_col?(grid, col, num) and
