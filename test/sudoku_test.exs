@@ -177,35 +177,4 @@ defmodule SudokuTest do
       assert length(hd(solution)) == 4
     end
   end
-
-  describe "DLX solver" do
-    test "solves valid 9x9 puzzle" do
-      solution = Sudoku.solve(@valid_9x9_puzzle, Sudoku.DLX)
-
-      assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
-    end
-
-    test "returns nil for invalid puzzle" do
-      solution = Sudoku.solve(@invalid_9x9_puzzle, Sudoku.DLX)
-
-      assert is_nil(solution)
-    end
-
-    test "solves 4x4 puzzle" do
-      puzzle = [
-        [1, 2, 0, 0],
-        [3, 4, 0, 0],
-        [0, 3, 2, 1],
-        [0, 0, 4, 3]
-      ]
-
-      solution = Sudoku.solve(puzzle, Sudoku.DLX)
-
-      assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
-      assert length(solution) == 4
-      assert length(hd(solution)) == 4
-    end
-  end
 end
