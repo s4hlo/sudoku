@@ -20,4 +20,5 @@ defmodule Sudoku do
   def solve(grid, solver) when is_list(grid) and is_atom(solver) do
     solver.solve(grid)
   end
+
 end

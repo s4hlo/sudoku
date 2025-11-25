@@ -177,4 +177,56 @@ defmodule SudokuTest do
       assert length(hd(solution)) == 4
     end
   end
+
+  describe "read_file" do
+    test "reads valid 9x9 puzzle from sample.txt" do
+      {:ok, grid} = Sudoku.File.read_file("sample.txt")
+
+      assert grid == @valid_9x9_puzzle
+    end
+
+    test "reads valid file and can solve it" do
+      {:ok, grid} = Sudoku.File.read_file("sample.txt")
+
+      solution = Sudoku.solve(grid)
+      assert not is_nil(solution)
+      assert Validator.is_valid_solution?(solution)
+    end
+
+    test "reads valid 4x4 puzzle file" do
+      # Create temporary file
+      file_content = """
+      2
+      1200
+      3400
+      0021
+      0043
+      """
+
+      tmp_file = System.tmp_dir!() |> Path.join("sudoku_4x4_test.txt")
+      File.write!(tmp_file, file_content)
+
+      try do
+        {:ok, grid} = Sudoku.File.read_file(tmp_file)
+
+        assert length(grid) == 4
+        assert length(hd(grid)) == 4
+        assert grid == @valid_4x4_puzzle
+      after
+        File.rm(tmp_file)
+      end
+    end
+
+    test "returns error for invalid file" do
+      tmp_file = System.tmp_dir!() |> Path.join("invalid_test.txt")
+      File.write!(tmp_file, "invalid content")
+
+      try do
+        result = Sudoku.File.read_file(tmp_file)
+        assert {:error, _} = result
+      after
+        File.rm(tmp_file)
+      end
+    end
+  end
 end
