@@ -24,6 +24,12 @@ defmodule Sudoku.AlgorithmX do
     end
   end
 
+  def solve_log(grid) when is_list(grid) do
+    # Algorithm X doesn't support history tracking as it doesn't play the game step by step
+    # It solves the exact cover problem directly, so we just return the solution
+    solve(grid)
+  end
+
   # Algorithm X implementation following the paper's logic:
   # 1. If A is empty, the problem is solved; terminate successfully.
   # 2. Otherwise choose a column, c (deterministically).
