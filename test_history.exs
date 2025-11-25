@@ -1,11 +1,3 @@
-# puzzle = [
-#   [1, 4, 0, 0],
-#   [3, 4, 0, 0],
-#   [0, 0, 0, 1],
-#   [0, 0, 4, 0]
-# ]
-
-
 puzzle = [
   [5, 3, 0, 0, 7, 0, 0, 0, 0],
   [6, 0, 0, 1, 9, 5, 0, 0, 0],
@@ -18,27 +10,36 @@ puzzle = [
   [0, 0, 0, 0, 8, 0, 0, 7, 9]
 ]
 
-IO.puts("Testing history feature...")
 history = Sudoku.solve_log(puzzle, Sudoku.Backtracking)
 
 if history do
-  IO.puts("✓ History returned successfully")
-  IO.puts("Number of states: #{length(history)}")
-  IO.puts("\nAll states:")
-  IO.puts(String.duplicate("=", 50))
-  
-  history
-  |> Enum.with_index(1)
-  |> Enum.each(fn {state, index} ->
-    IO.puts("\nState #{index}:")
-    state
-    |> Enum.each(fn row ->
-      row
-      |> Enum.map(&Integer.to_string/1)
-      |> Enum.join(" ")
-      |> IO.puts()
+  formatted = 
+    history
+    |> Enum.with_index(1)
+    |> Enum.map(fn {state, index} ->
+      rows = 
+        state
+        |> Enum.map(fn row ->
+          row_string = 
+            row
+            |> Enum.map(&Integer.to_string/1)
+            |> Enum.join(", ")
+          "    [#{row_string}],"
+        end)
+        |> Enum.join("\n")
+      
+      if index < length(history) do
+        "  [\n#{rows}\n  ],"
+      else
+        "  [\n#{rows}\n  ]"
+      end
     end)
-  end)
+    |> Enum.join("\n")
+  
+  result = "[\n#{formatted}\n]"
+  
+  IO.puts(result)
+  File.write!("history_output.exs", result)
 else
-  IO.puts("✗ No solution found")
+  :error
 end
