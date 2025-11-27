@@ -72,7 +72,6 @@ defmodule Sudoku.Backtracking do
 
   # Deep copy helper to ensure each state in history is independent
   defp deep_copy(grid) do
-    Enum.map(grid, fn row -> List.to_tuple(row) end)
-    |> Enum.map(&Tuple.to_list/1)
+    Enum.map(grid, fn row -> Enum.map(row, & &1) end)
   end
 end
