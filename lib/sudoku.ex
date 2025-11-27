@@ -1,7 +1,7 @@
 defmodule Sudoku do
   @moduledoc """
   Main module for solving Sudoku puzzles.
-  
+
   Supports multiple solving algorithms. By default, uses backtracking.
   """
 
@@ -25,5 +25,4 @@ defmodule Sudoku do
   def solve_log(grid, solver) when is_list(grid) and is_atom(solver) do
     solver.solve_log(grid)
   end
-
 end

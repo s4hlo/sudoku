@@ -1,21 +1,21 @@
 defmodule Sudoku.AlgorithmX do
   @moduledoc """
   Solves Sudoku puzzles using Algorithm X (exact cover) with dancing links.
-  
+
   This implementation uses Donald Knuth's Algorithm X to solve Sudoku as an exact cover problem.
   """
 
   def solve(grid) when is_list(grid) do
     grid_size = length(grid)
     box_size = Utils.calculate_box_size(grid_size)
-    
+
     # Validate initial grid doesn't violate constraints
     if not Validator.valid_initial_grid?(grid, grid_size, box_size) do
       nil
     else
       # Build exact cover matrix from initial grid
       matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, grid_size, box_size)
-      
+
       # Solve using Algorithm X
       case algorithm_x(matrix, []) do
         nil -> nil
@@ -50,11 +50,11 @@ defmodule Sudoku.AlgorithmX do
         nil ->
           # No columns left or no solution possible
           nil
-        
+
         column_c ->
           # Step 3: Find all rows r such that A[r, c] = 1
           rows_with_c = find_rows_with_column(matrix, column_c)
-          
+
           if rows_with_c == [] do
             # No row covers this column - backtrack
             nil
@@ -75,10 +75,12 @@ defmodule Sudoku.AlgorithmX do
           Map.update(acc2, column, 1, &(&1 + 1))
         end)
       end)
-    
+
     # Find column with minimum count (but > 0)
     case column_counts do
-      map when map == %{} -> nil
+      map when map == %{} ->
+        nil
+
       _ ->
         {column, _count} = Enum.min_by(column_counts, fn {_k, v} -> v end)
         column
@@ -98,13 +100,13 @@ defmodule Sudoku.AlgorithmX do
   defp try_rows(matrix, [{constraints_r, choice} | rest], column_c, partial_solution) do
     # Step 4: Include r in the partial solution
     new_partial_solution = [choice | partial_solution]
-    
+
     # Step 5: For each j such that A[r, j] = 1,
     #         delete column j from matrix A;
     #         for each i such that A[i, j] = 1,
     #         delete row i from matrix A.
     reduced_matrix = reduce_matrix(matrix, constraints_r)
-    
+
     # Step 6: Repeat this algorithm recursively on the reduced matrix A
     case algorithm_x(reduced_matrix, new_partial_solution) do
       nil -> try_rows(matrix, rest, column_c, partial_solution)
@@ -130,5 +132,4 @@ defmodule Sudoku.AlgorithmX do
       {new_constraints, choice}
     end)
   end
-
 end

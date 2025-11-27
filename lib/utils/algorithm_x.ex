@@ -12,7 +12,7 @@ defmodule Utils.AlgorithmX do
           into: [] do
         # Check if this choice is already fixed in the grid
         current_value = grid |> Enum.at(r) |> Enum.at(c)
-        
+
         if current_value == 0 or current_value == n do
           {r, c, n}
         else
@@ -20,7 +20,7 @@ defmodule Utils.AlgorithmX do
         end
       end
       |> Enum.filter(&(&1 != nil))
-    
+
     # Build binary matrix: list of {constraints, choice} where constraints is a MapSet of column indices
     Enum.map(rows, fn {r, c, n} = choice ->
       constraints = calculate_constraints(r, c, n, grid_size, box_size)
@@ -38,12 +38,12 @@ defmodule Utils.AlgorithmX do
     cell_constraint = r * grid_size + c
     row_constraint = grid_size * grid_size + r * grid_size + (n - 1)
     col_constraint = 2 * grid_size * grid_size + c * grid_size + (n - 1)
-    
+
     box_row = div(r, box_size)
     box_col = div(c, box_size)
     box_index = box_row * div(grid_size, box_size) + box_col
     box_constraint = 3 * grid_size * grid_size + box_index * grid_size + (n - 1)
-    
+
     MapSet.new([cell_constraint, row_constraint, col_constraint, box_constraint])
   end
 
@@ -54,7 +54,7 @@ defmodule Utils.AlgorithmX do
       Enum.reduce(solution, %{}, fn {r, c, n}, acc ->
         Map.put(acc, {r, c}, n)
       end)
-    
+
     # Build grid
     for r <- 0..(grid_size - 1) do
       for c <- 0..(grid_size - 1) do

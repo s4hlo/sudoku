@@ -14,7 +14,8 @@ defmodule Utils do
     trunc(:math.sqrt(grid_size))
   end
 
-  def create_puzzle_from_solved(solved_grid, reduction_percentage) when is_float(reduction_percentage) or is_integer(reduction_percentage) do
+  def create_puzzle_from_solved(solved_grid, reduction_percentage)
+      when is_float(reduction_percentage) or is_integer(reduction_percentage) do
     grid_size = length(solved_grid)
     total_cells = grid_size * grid_size
     cells_to_zero = trunc(total_cells * reduction_percentage)

@@ -120,7 +120,8 @@ defmodule Sudoku.File do
           cell_values = Enum.map(row, fn {:ok, val} -> val end)
 
           if length(cell_values) != expected_length do
-            {:error, "Row #{row_num} has length #{length(cell_values)}, expected #{expected_length}"}
+            {:error,
+             "Row #{row_num} has length #{length(cell_values)}, expected #{expected_length}"}
           else
             {:ok, cell_values}
           end

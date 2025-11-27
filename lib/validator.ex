@@ -1,11 +1,10 @@
 defmodule Validator do
-
   def valid_initial_grid?(grid, grid_size, box_size) do
     # Check each filled cell to ensure it doesn't violate constraints
     Enum.all?(0..(grid_size - 1), fn row ->
       Enum.all?(0..(grid_size - 1), fn col ->
         value = grid |> Enum.at(row) |> Enum.at(col)
-        
+
         # Empty cells (0 or nil) are always valid
         if value == 0 or value == nil do
           true
@@ -74,7 +73,6 @@ defmodule Validator do
       all_cols_valid?(grid, grid_size, max_num) and
       all_boxes_valid?(grid, box_size, max_num)
   end
-
 
   defp all_filled?(grid) do
     Enum.all?(grid, fn row ->
