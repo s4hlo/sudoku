@@ -13,33 +13,8 @@ puzzle = [
 history = Sudoku.solve_log(puzzle, Sudoku.Backtracking)
 
 if history do
-  formatted = 
-    history
-    |> Enum.with_index(1)
-    |> Enum.map(fn {state, index} ->
-      rows = 
-        state
-        |> Enum.map(fn row ->
-          row_string = 
-            row
-            |> Enum.map(&Integer.to_string/1)
-            |> Enum.join(", ")
-          "    [#{row_string}],"
-        end)
-        |> Enum.join("\n")
-      
-      if index < length(history) do
-        "  [\n#{rows}\n  ],"
-      else
-        "  [\n#{rows}\n  ]"
-      end
-    end)
-    |> Enum.join("\n")
-  
-  result = "[\n#{formatted}\n]"
-  
-  IO.puts(result)
-  File.write!("history_output.exs", result)
+  json_result = Jason.encode!(history, pretty: true)
+  File.write!("history_output.json", json_result)
 else
   :error
 end
