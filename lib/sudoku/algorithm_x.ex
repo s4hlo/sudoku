@@ -5,29 +5,23 @@ defmodule Sudoku.AlgorithmX do
   This implementation uses Donald Knuth's Algorithm X to solve Sudoku as an exact cover problem.
   """
 
-  def solve(grid) when is_list(grid) do
-    grid_size = length(grid)
-    box_size = Utils.calculate_box_size(grid_size)
+  def solve(grid, grid_size, box_size) when is_list(grid) do
+    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, grid_size, box_size)
 
-    # Validate initial grid doesn't violate constraints
-    if not Validator.valid_initial_grid?(grid, grid_size, box_size) do
-      nil
-    else
-      # Build exact cover matrix from initial grid
-      matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, grid_size, box_size)
-
-      # Solve using Algorithm X
-      case algorithm_x(matrix, []) do
-        nil -> nil
-        solution -> Utils.AlgorithmX.solution_to_grid(solution, grid, grid_size)
-      end
+    case algorithm_x(matrix, []) do
+      nil -> nil
+      solution -> Utils.AlgorithmX.solution_to_grid(solution, grid, grid_size)
     end
   end
 
-  def solve_log(grid) when is_list(grid) do
-    # Algorithm X doesn't support history tracking as it doesn't play the game step by step
-    # It solves the exact cover problem directly, so we just return the solution
-    solve(grid)
+  def solve_log(grid, grid_size, box_size) when is_list(grid) do
+    # Algorithm X doesn't support step-by-step history tracking as it solves
+    # the exact cover problem directly. We return a history with just the initial
+    # and final states.
+    case solve(grid, grid_size, box_size) do
+      nil -> nil
+      solution -> [grid, solution]
+    end
   end
 
   # Algorithm X implementation following the paper's logic:

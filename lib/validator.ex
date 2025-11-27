@@ -66,12 +66,11 @@ defmodule Validator do
   def is_valid_solution?(grid) do
     grid_size = length(grid)
     box_size = Utils.calculate_box_size(grid_size)
-    max_num = grid_size
 
     all_filled?(grid) and
-      all_rows_valid?(grid, max_num) and
-      all_cols_valid?(grid, grid_size, max_num) and
-      all_boxes_valid?(grid, box_size, max_num)
+      all_rows_valid?(grid, grid_size) and
+      all_cols_valid?(grid, grid_size) and
+      all_boxes_valid?(grid, box_size, grid_size)
   end
 
   defp all_filled?(grid) do
@@ -80,20 +79,20 @@ defmodule Validator do
     end)
   end
 
-  defp all_rows_valid?(grid, max_num) do
+  defp all_rows_valid?(grid, grid_size) do
     Enum.all?(grid, fn row ->
-      Enum.sort(row) == Enum.to_list(1..max_num)
+      Enum.sort(row) == Enum.to_list(1..grid_size)
     end)
   end
 
-  defp all_cols_valid?(grid, grid_size, max_num) do
+  defp all_cols_valid?(grid, grid_size) do
     Enum.all?(0..(grid_size - 1), fn col ->
       col_data = Enum.map(grid, &Enum.at(&1, col))
-      Enum.sort(col_data) == Enum.to_list(1..max_num)
+      Enum.sort(col_data) == Enum.to_list(1..grid_size)
     end)
   end
 
-  defp all_boxes_valid?(grid, box_size, max_num) do
+  defp all_boxes_valid?(grid, box_size, grid_size) do
     num_boxes = div(length(grid), box_size)
 
     Enum.all?(0..(num_boxes - 1), fn box_row ->
@@ -107,7 +106,7 @@ defmodule Validator do
             grid |> Enum.at(r) |> Enum.at(c)
           end
 
-        Enum.sort(box_data) == Enum.to_list(1..max_num)
+        Enum.sort(box_data) == Enum.to_list(1..grid_size)
       end)
     end)
   end
