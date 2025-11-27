@@ -34,7 +34,7 @@ defmodule Sudoku.Backtracking do
     case Utils.find_empty_cell(grid) do
       nil ->
         # Solved - add final state and return grid and history (reversed to show progression)
-        final_history = [deep_copy(grid) | history]
+        final_history = [Utils.deep_copy(grid) | history]
         {grid, Enum.reverse(final_history)}
 
       {row, col} ->
@@ -50,7 +50,7 @@ defmodule Sudoku.Backtracking do
     if Validator.valid_move?(grid, row, col, num, box_size) do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
       # Add snapshot only when a number is actually placed
-      updated_history = [deep_copy(new_grid) | history]
+      updated_history = [Utils.deep_copy(new_grid) | history]
 
       case solve_with_history(new_grid, grid_size, box_size, updated_history) do
         {nil, final_history} ->
@@ -62,9 +62,5 @@ defmodule Sudoku.Backtracking do
     else
       try_values_with_history(grid, row, col, num + 1, grid_size, box_size, history)
     end
-  end
-
-  defp deep_copy(grid) do
-    Enum.map(grid, fn row -> Enum.map(row, & &1) end)
   end
 end

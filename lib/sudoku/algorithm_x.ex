@@ -15,12 +15,12 @@ defmodule Sudoku.AlgorithmX do
   end
 
   def solve_log(grid, grid_size, box_size) when is_list(grid) do
-    # Algorithm X doesn't support step-by-step history tracking as it solves
-    # the exact cover problem directly. We return a history with just the initial
-    # and final states.
-    case solve(grid, grid_size, box_size) do
+    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, grid_size, box_size)
+    initial_history = [{Utils.deep_copy(grid), matrix}]
+
+    case algorithm_x_with_history(matrix, [], grid, grid_size, initial_history) do
       nil -> nil
-      solution -> [grid, solution]
+      {_solution, history} -> Enum.reverse(history)
     end
   end
 
@@ -55,6 +55,44 @@ defmodule Sudoku.AlgorithmX do
           else
             # Try each row r (nondeterministically - we try all possibilities)
             try_rows(matrix, rows_with_c, column_c, partial_solution)
+          end
+      end
+    end
+  end
+
+  # Algorithm X with history tracking
+  defp algorithm_x_with_history(matrix, partial_solution, original_grid, grid_size, history) do
+    # Step 1: If A is empty, the problem is solved; terminate successfully.
+    if matrix == [] do
+      # Convert final solution to grid and add to history
+      final_grid = Utils.AlgorithmX.solution_to_grid(partial_solution, original_grid, grid_size)
+      final_history = [{Utils.deep_copy(final_grid), []} | history]
+      {partial_solution, final_history}
+    else
+      # Step 2: Choose a column, c (deterministically).
+      case choose_column(matrix) do
+        nil ->
+          # No columns left or no solution possible
+          nil
+
+        column_c ->
+          # Step 3: Find all rows r such that A[r, c] = 1
+          rows_with_c = find_rows_with_column(matrix, column_c)
+
+          if rows_with_c == [] do
+            # No row covers this column - backtrack
+            nil
+          else
+            # Try each row r (nondeterministically - we try all possibilities)
+            try_rows_with_history(
+              matrix,
+              rows_with_c,
+              column_c,
+              partial_solution,
+              original_grid,
+              grid_size,
+              history
+            )
           end
       end
     end
@@ -105,6 +143,64 @@ defmodule Sudoku.AlgorithmX do
     case algorithm_x(reduced_matrix, new_partial_solution) do
       nil -> try_rows(matrix, rest, column_c, partial_solution)
       solution -> solution
+    end
+  end
+
+  # Try each row r that covers column c (with history tracking)
+  defp try_rows_with_history(
+         _matrix,
+         [],
+         _column_c,
+         _partial_solution,
+         _original_grid,
+         _grid_size,
+         _history
+       ),
+       do: nil
+
+  defp try_rows_with_history(
+         matrix,
+         [{constraints_r, choice} | rest],
+         column_c,
+         partial_solution,
+         original_grid,
+         grid_size,
+         history
+       ) do
+    # Step 4: Include r in the partial solution
+    new_partial_solution = [choice | partial_solution]
+
+    # Step 5: For each j such that A[r, j] = 1,
+    #         delete column j from matrix A;
+    #         for each i such that A[i, j] = 1,
+    #         delete row i from matrix A.
+    reduced_matrix = reduce_matrix(matrix, constraints_r)
+
+    # Convert partial solution to grid and add to history with reduced matrix
+    current_grid = Utils.AlgorithmX.solution_to_grid(new_partial_solution, original_grid, grid_size)
+    updated_history = [{Utils.deep_copy(current_grid), reduced_matrix} | history]
+
+    # Step 6: Repeat this algorithm recursively on the reduced matrix A
+    case algorithm_x_with_history(
+           reduced_matrix,
+           new_partial_solution,
+           original_grid,
+           grid_size,
+           updated_history
+         ) do
+      nil ->
+        try_rows_with_history(
+          matrix,
+          rest,
+          column_c,
+          partial_solution,
+          original_grid,
+          grid_size,
+          history
+        )
+
+      result ->
+        result
     end
   end
 

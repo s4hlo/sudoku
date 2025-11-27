@@ -9,7 +9,7 @@ defmodule Sudoku.Visualizer do
   Each state is displayed with beautiful box-drawing borders similar to Neovim plugins.
 
   ## Parameters
-  - `history`: List of sudoku board states (from `solve_log`)
+  - `history`: List of sudoku board states (from `solve_log`) or list of {grid, matrix} tuples
   - `opts`: Keyword list of options:
     - `:delay` - Delay between frames in milliseconds (default: 100)
     - `:clear_screen` - Whether to clear screen between frames (default: true)
@@ -18,18 +18,29 @@ defmodule Sudoku.Visualizer do
     delay = Keyword.get(opts, :delay, 100)
     clear_screen = Keyword.get(opts, :clear_screen, true)
 
+    # Check if history contains {grid, matrix} tuples or just grids
+    has_matrix = Enum.any?(history, fn state ->
+      is_tuple(state) and tuple_size(state) == 2
+    end)
+
     history
     |> Enum.with_index(1)
     |> Enum.each(fn {state, index} ->
-      # Build the complete board content first
-      board_content = build_board_content(state, index, length(history))
+      # Build the complete content
+      content = if has_matrix and is_tuple(state) do
+        {grid, matrix} = state
+        grid_size = length(grid)
+        build_combined_content(grid, matrix, grid_size, index, length(history))
+      else
+        build_board_content(state, index, length(history))
+      end
 
       # Clear screen and print immediately in one operation to avoid flickering
       output =
         if clear_screen do
-          IO.ANSI.clear() <> IO.ANSI.cursor(0, 0) <> board_content
+          IO.ANSI.clear() <> IO.ANSI.cursor(0, 0) <> content
         else
-          board_content
+          content
         end
 
       # Use IO.write to properly handle Unicode characters
@@ -173,5 +184,134 @@ defmodule Sudoku.Visualizer do
         "│"
 
     [row_line]
+  end
+
+  @doc """
+  Visualizes the exact cover matrix used by Algorithm X.
+
+  ## Parameters
+  - `matrix`: List of {constraints, {r, c, n}} tuples from Algorithm X
+  - `grid_size`: Size of the sudoku grid
+  """
+  def visualize_exact_cover_matrix(matrix, grid_size) do
+    # Calculate total number of constraints (columns)
+    total_constraints = 4 * grid_size * grid_size
+
+    # Build binary matrix representation with triples
+    binary_matrix_with_triples =
+      Enum.map(matrix, fn {constraints, {r, c, n}} ->
+        # Create a list of - and O for each row
+        binary_row =
+          for col <- 0..(total_constraints - 1) do
+            if MapSet.member?(constraints, col), do: "O", else: "-"
+          end
+
+        {{r, c, n}, binary_row}
+      end)
+
+    # Print header with dimensions and constraint order
+    m = length(binary_matrix_with_triples)
+    n = total_constraints
+
+    IO.puts("#{m}x#{n}")
+    IO.puts("Constraint order: Cell | Row | Column | Box")
+
+    # Print the matrix with triples
+    Enum.each(binary_matrix_with_triples, fn {{r, c, n}, row} ->
+      IO.puts("(#{r},#{c},#{n}) #{Enum.join(row, "")}")
+    end)
+  end
+
+  # Build combined content showing board and matrix side by side
+  defp build_combined_content(grid, matrix, grid_size, frame_num, total_frames) do
+    # Build board content
+    board_lines = build_board_lines(grid, grid_size, Utils.calculate_box_size(grid_size), 3)
+    board_width = board_lines |> List.first() |> String.length()
+
+    # Build matrix content
+    matrix_lines = build_matrix_lines(matrix, grid_size)
+
+    # Find maximum height
+    max_height = max(length(board_lines), length(matrix_lines))
+
+    # Pad both to same height
+    padded_board = pad_lines(board_lines, max_height, board_width)
+    padded_matrix = pad_lines(matrix_lines, max_height, 0)
+
+    # Combine side by side
+    frame_info = "Frame #{frame_num}/#{total_frames}"
+    header = frame_info <> String.duplicate(" ", board_width + 5 - String.length(frame_info)) <> "Matrix"
+
+    combined_lines =
+      Enum.zip(padded_board, padded_matrix)
+      |> Enum.map(fn {board_line, matrix_line} ->
+        board_line <> "   " <> matrix_line
+      end)
+
+    header <> "\n" <> Enum.join(combined_lines, "\n") <> "\n"
+  end
+
+  # Build matrix lines for display
+  defp build_matrix_lines(matrix, grid_size) do
+    if matrix == [] do
+      ["(empty matrix)"]
+    else
+      total_constraints = 4 * grid_size * grid_size
+
+      # Build binary matrix representation with triples
+      binary_matrix_with_triples =
+        Enum.map(matrix, fn {constraints, {r, c, n}} ->
+          binary_row =
+            for col <- 0..(total_constraints - 1) do
+              if MapSet.member?(constraints, col), do: "O", else: "-"
+            end
+
+          {{r, c, n}, binary_row}
+        end)
+
+      m = length(binary_matrix_with_triples)
+      n = total_constraints
+
+      # Header lines
+      header_lines = [
+        "#{m}x#{n}",
+        "Cell|Row|Col|Box"
+      ]
+
+      # Matrix rows (limit to reasonable number for display)
+      # For small grids (4x4), show more rows and don't truncate columns
+      max_rows = if grid_size <= 4, do: 50, else: 20
+      max_cols = if grid_size <= 4, do: total_constraints, else: 60
+      
+      matrix_rows =
+        binary_matrix_with_triples
+        |> Enum.take(max_rows)
+        |> Enum.map(fn {{r, c, n}, row} ->
+          row_str = Enum.join(row, "")
+          # For small grids, show full row; for larger, truncate
+          display_row = if grid_size <= 4 do
+            row_str
+          else
+            if String.length(row_str) > max_cols, do: String.slice(row_str, 0..(max_cols - 1)) <> "...", else: row_str
+          end
+          "(#{r},#{c},#{n}) #{display_row}"
+        end)
+
+      final_matrix_rows = if length(binary_matrix_with_triples) > max_rows do
+        matrix_rows ++ ["... (#{length(binary_matrix_with_triples) - max_rows} more rows)"]
+      else
+        matrix_rows
+      end
+
+      header_lines ++ final_matrix_rows
+    end
+  end
+
+  # Pad lines to specified height
+  defp pad_lines(lines, target_height, width) do
+    current_height = length(lines)
+    padding_needed = max(0, target_height - current_height)
+    padding = List.duplicate(String.duplicate(" ", width), padding_needed)
+    lines ++ padding
   end
 end

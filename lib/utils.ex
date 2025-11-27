@@ -1,4 +1,8 @@
 defmodule Utils do
+  def deep_copy(grid) do
+    Enum.map(grid, fn row -> Enum.map(row, & &1) end)
+  end
+
   def find_empty_cell(grid) do
     grid
     |> Enum.with_index()
