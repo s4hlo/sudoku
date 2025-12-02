@@ -14,7 +14,8 @@ defmodule Utils do
     end)
   end
 
-  def calculate_box_size(grid_size) do
+  def calculate_order(grid) do
+    grid_size = length(grid)
     trunc(:math.sqrt(grid_size))
   end
 

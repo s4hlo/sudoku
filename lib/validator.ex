@@ -1,5 +1,7 @@
 defmodule Validator do
-  def valid_initial_grid?(grid, grid_size, box_size) do
+  def valid_initial_grid?(grid) do
+    order = Utils.calculate_order(grid)
+    grid_size = order * order
     # Check each filled cell to ensure it doesn't violate constraints
     Enum.all?(0..(grid_size - 1), fn row ->
       Enum.all?(0..(grid_size - 1), fn col ->
@@ -11,7 +13,7 @@ defmodule Validator do
         else
           # Temporarily remove this cell's value to check if placing it is valid
           temp_grid = remove_cell_value(grid, row, col)
-          Validator.valid_move?(temp_grid, row, col, value, box_size)
+          Validator.valid_move?(temp_grid, row, col, value)
         end
       end)
     end)
@@ -34,10 +36,10 @@ defmodule Validator do
     end)
   end
 
-  def valid_move?(grid, row, col, num, box_size) do
+  def valid_move?(grid, row, col, num) do
     valid_in_row?(grid, row, num) and
       valid_in_col?(grid, col, num) and
-      valid_in_box?(grid, row, col, num, box_size)
+      valid_in_box?(grid, row, col, num)
   end
 
   defp valid_in_row?(grid, row, num) do
@@ -50,13 +52,14 @@ defmodule Validator do
     not Enum.member?(col_data, num)
   end
 
-  defp valid_in_box?(grid, row, col, num, box_size) do
-    box_start_row = div(row, box_size) * box_size
-    box_start_col = div(col, box_size) * box_size
+  defp valid_in_box?(grid, row, col, num) do
+    order = Utils.calculate_order(grid)
+    box_start_row = div(row, order) * order
+    box_start_col = div(col, order) * order
 
     box_data =
-      for r <- box_start_row..(box_start_row + box_size - 1),
-          c <- box_start_col..(box_start_col + box_size - 1) do
+      for r <- box_start_row..(box_start_row + order - 1),
+          c <- box_start_col..(box_start_col + order - 1) do
         grid |> Enum.at(r) |> Enum.at(c)
       end
 
@@ -65,12 +68,12 @@ defmodule Validator do
 
   def is_valid_solution?(grid) do
     grid_size = length(grid)
-    box_size = Utils.calculate_box_size(grid_size)
+    order = trunc(:math.sqrt(grid_size))
 
     all_filled?(grid) and
-      all_rows_valid?(grid, grid_size) and
-      all_cols_valid?(grid, grid_size) and
-      all_boxes_valid?(grid, box_size, grid_size)
+      all_rows_valid?(grid, order) and
+      all_cols_valid?(grid, order) and
+      all_boxes_valid?(grid, order)
   end
 
   defp all_filled?(grid) do
@@ -79,30 +82,33 @@ defmodule Validator do
     end)
   end
 
-  defp all_rows_valid?(grid, grid_size) do
+  defp all_rows_valid?(grid, order) do
+    grid_size = order * order
     Enum.all?(grid, fn row ->
       Enum.sort(row) == Enum.to_list(1..grid_size)
     end)
   end
 
-  defp all_cols_valid?(grid, grid_size) do
+  defp all_cols_valid?(grid, order) do
+    grid_size = order * order
     Enum.all?(0..(grid_size - 1), fn col ->
       col_data = Enum.map(grid, &Enum.at(&1, col))
       Enum.sort(col_data) == Enum.to_list(1..grid_size)
     end)
   end
 
-  defp all_boxes_valid?(grid, box_size, grid_size) do
-    num_boxes = div(length(grid), box_size)
+  defp all_boxes_valid?(grid, order) do
+    grid_size = order * order
+    num_boxes = order
 
     Enum.all?(0..(num_boxes - 1), fn box_row ->
       Enum.all?(0..(num_boxes - 1), fn box_col ->
-        start_row = box_row * box_size
-        start_col = box_col * box_size
+        start_row = box_row * order
+        start_col = box_col * order
 
         box_data =
-          for r <- start_row..(start_row + box_size - 1),
-              c <- start_col..(start_col + box_size - 1) do
+          for r <- start_row..(start_row + order - 1),
+              c <- start_col..(start_col + order - 1) do
             grid |> Enum.at(r) |> Enum.at(c)
           end
 

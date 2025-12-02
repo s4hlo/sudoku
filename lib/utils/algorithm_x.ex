@@ -3,7 +3,8 @@ defmodule Utils.AlgorithmX do
   # - Each row represents a choice (placing number n in cell r,c)
   # - Each column represents a constraint
   # - A[r, c] = 1 means row r satisfies constraint c
-  def build_exact_cover_matrix(grid, grid_size, box_size) do
+  def build_exact_cover_matrix(grid, order) do
+    grid_size = order * order
     # Generate all possible choices (rows)
     rows =
       for r <- 0..(grid_size - 1),
@@ -23,7 +24,7 @@ defmodule Utils.AlgorithmX do
 
     # Build binary matrix: list of {constraints, choice} where constraints is a MapSet of column indices
     Enum.map(rows, fn {r, c, n} = choice ->
-      constraints = calculate_constraints(r, c, n, grid_size, box_size)
+      constraints = calculate_constraints(r, c, n, order)
       {constraints, choice}
     end)
   end
@@ -34,21 +35,24 @@ defmodule Utils.AlgorithmX do
   # 2. Row constraint: row r must have number n (grid_size²..2*grid_size²-1)
   # 3. Column constraint: column c must have number n (2*grid_size²..3*grid_size²-1)
   # 4. Box constraint: box containing (r, c) must have number n (3*grid_size²..4*grid_size²-1)
-  defp calculate_constraints(r, c, n, grid_size, box_size) do
+  defp calculate_constraints(r, c, n, order) do
+    grid_size = order * order
     cell_constraint = r * grid_size + c
     row_constraint = grid_size * grid_size + r * grid_size + (n - 1)
     col_constraint = 2 * grid_size * grid_size + c * grid_size + (n - 1)
 
-    box_row = div(r, box_size)
-    box_col = div(c, box_size)
-    box_index = box_row * div(grid_size, box_size) + box_col
+    box_row = div(r, order)
+    box_col = div(c, order)
+    box_index = box_row * order + box_col
     box_constraint = 3 * grid_size * grid_size + box_index * grid_size + (n - 1)
 
     MapSet.new([cell_constraint, row_constraint, col_constraint, box_constraint])
   end
 
   # Convert solution (list of {r, c, n} tuples) back to grid format
-  def solution_to_grid(solution, original_grid, grid_size) do
+  def solution_to_grid(solution, original_grid) do
+    order = Utils.calculate_order(original_grid)
+    grid_size = order * order
     # Create a map from (r, c) to n
     solution_map =
       Enum.reduce(solution, %{}, fn {r, c, n}, acc ->

@@ -5,20 +5,22 @@ defmodule Sudoku.AlgorithmX do
   This implementation uses Donald Knuth's Algorithm X to solve Sudoku as an exact cover problem.
   """
 
-  def solve(grid, grid_size, box_size) when is_list(grid) do
-    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, grid_size, box_size)
+  def solve(grid) when is_list(grid) do
+    order = Utils.calculate_order(grid)
+    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, order)
 
     case algorithm_x(matrix, []) do
       nil -> nil
-      solution -> Utils.AlgorithmX.solution_to_grid(solution, grid, grid_size)
+      solution -> Utils.AlgorithmX.solution_to_grid(solution, grid)
     end
   end
 
-  def solve_log(grid, grid_size, box_size) when is_list(grid) do
-    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, grid_size, box_size)
+  def solve_log(grid) when is_list(grid) do
+    order = Utils.calculate_order(grid)
+    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, order)
     initial_history = [{Utils.deep_copy(grid), matrix}]
 
-    case algorithm_x_with_history(matrix, [], grid, grid_size, initial_history) do
+    case algorithm_x_with_history(matrix, [], grid, initial_history) do
       nil -> nil
       {_solution, history} -> Enum.reverse(history)
     end
@@ -53,7 +55,7 @@ defmodule Sudoku.AlgorithmX do
             # No row covers this column - backtrack
             nil
           else
-            # Try each row r (nondeterministically - we try all possibilities)
+           # Try each row r (nondeterministically - we try all possibilities)
             try_rows(matrix, rows_with_c, column_c, partial_solution)
           end
       end
@@ -61,11 +63,11 @@ defmodule Sudoku.AlgorithmX do
   end
 
   # Algorithm X with history tracking
-  defp algorithm_x_with_history(matrix, partial_solution, original_grid, grid_size, history) do
+  defp algorithm_x_with_history(matrix, partial_solution, original_grid, history) do
     # Step 1: If A is empty, the problem is solved; terminate successfully.
     if matrix == [] do
       # Convert final solution to grid and add to history
-      final_grid = Utils.AlgorithmX.solution_to_grid(partial_solution, original_grid, grid_size)
+      final_grid = Utils.AlgorithmX.solution_to_grid(partial_solution, original_grid)
       final_history = [{Utils.deep_copy(final_grid), []} | history]
       {partial_solution, final_history}
     else
@@ -90,7 +92,6 @@ defmodule Sudoku.AlgorithmX do
               column_c,
               partial_solution,
               original_grid,
-              grid_size,
               history
             )
           end
@@ -153,7 +154,6 @@ defmodule Sudoku.AlgorithmX do
          _column_c,
          _partial_solution,
          _original_grid,
-         _grid_size,
          _history
        ),
        do: nil
@@ -164,7 +164,6 @@ defmodule Sudoku.AlgorithmX do
          column_c,
          partial_solution,
          original_grid,
-         grid_size,
          history
        ) do
     # Step 4: Include r in the partial solution
@@ -177,7 +176,7 @@ defmodule Sudoku.AlgorithmX do
     reduced_matrix = reduce_matrix(matrix, constraints_r)
 
     # Convert partial solution to grid and add to history with reduced matrix
-    current_grid = Utils.AlgorithmX.solution_to_grid(new_partial_solution, original_grid, grid_size)
+    current_grid = Utils.AlgorithmX.solution_to_grid(new_partial_solution, original_grid)
     updated_history = [{Utils.deep_copy(current_grid), reduced_matrix} | history]
 
     # Step 6: Repeat this algorithm recursively on the reduced matrix A
@@ -185,7 +184,6 @@ defmodule Sudoku.AlgorithmX do
            reduced_matrix,
            new_partial_solution,
            original_grid,
-           grid_size,
            updated_history
          ) do
       nil ->
@@ -195,7 +193,6 @@ defmodule Sudoku.AlgorithmX do
           column_c,
           partial_solution,
           original_grid,
-          grid_size,
           history
         )
 

@@ -29,8 +29,7 @@ defmodule Sudoku.Visualizer do
       # Build the complete content
       content = if has_matrix and is_tuple(state) do
         {grid, matrix} = state
-        grid_size = length(grid)
-        build_combined_content(grid, matrix, grid_size, index, length(history))
+        build_combined_content(grid, matrix, index, length(history))
       else
         build_board_content(state, index, length(history))
       end
@@ -59,14 +58,14 @@ defmodule Sudoku.Visualizer do
 
   defp build_board_content(grid, frame_num, total_frames) when is_list(grid) do
     grid_size = length(grid)
-    box_size = Utils.calculate_box_size(grid_size)
+    order = trunc(:math.sqrt(grid_size))
 
     # Calculate cell width (for numbers up to grid_size)
     # Use a fixed width of 3 for better visual appearance (1 char for number + 1 space on each side)
     cell_content_width = 3
 
     # Build the board first to get actual width
-    lines = build_board_lines(grid, grid_size, box_size, cell_content_width)
+    lines = build_board_lines(grid, order, cell_content_width)
     board_width = lines |> List.first() |> String.length()
 
     # Add frame info
@@ -80,21 +79,22 @@ defmodule Sudoku.Visualizer do
     frame_info
   end
 
-  defp build_board_lines(grid, grid_size, box_size, cell_width) do
+  defp build_board_lines(grid, order, cell_width) do
+    grid_size = order * order
     # Top border
-    top_border = build_top_border(grid_size, box_size, cell_width)
+    top_border = build_top_border(order, cell_width)
 
     # Grid rows
     grid_lines =
       grid
       |> Enum.with_index()
       |> Enum.flat_map(fn {row, row_idx} ->
-        row_lines = build_row_lines(row, row_idx, grid_size, box_size, cell_width)
+        row_lines = build_row_lines(row, row_idx, order, cell_width)
 
         # Add separator after each box (except last)
         separator =
-          if rem(row_idx + 1, box_size) == 0 and row_idx < grid_size - 1 do
-            [build_horizontal_separator(grid_size, box_size, cell_width)]
+          if rem(row_idx + 1, order) == 0 and row_idx < grid_size - 1 do
+            [build_horizontal_separator(order, cell_width)]
           else
             []
           end
@@ -103,18 +103,19 @@ defmodule Sudoku.Visualizer do
       end)
 
     # Bottom border
-    bottom_border = build_bottom_border(grid_size, box_size, cell_width)
+    bottom_border = build_bottom_border(order, cell_width)
 
     [top_border] ++ grid_lines ++ [bottom_border]
   end
 
-  defp build_top_border(grid_size, box_size, cell_width) do
+  defp build_top_border(order, cell_width) do
+    grid_size = order * order
     "╭" <>
       (0..(grid_size - 1)
        |> Enum.map(fn col_idx ->
          String.duplicate("─", cell_width) <>
            cond do
-             rem(col_idx + 1, box_size) == 0 and col_idx < grid_size - 1 -> "┬"
+             rem(col_idx + 1, order) == 0 and col_idx < grid_size - 1 -> "┬"
              col_idx < grid_size - 1 -> "─"
              true -> ""
            end
@@ -123,13 +124,14 @@ defmodule Sudoku.Visualizer do
       "╮"
   end
 
-  defp build_bottom_border(grid_size, box_size, cell_width) do
+  defp build_bottom_border(order, cell_width) do
+    grid_size = order * order
     "╰" <>
       (0..(grid_size - 1)
        |> Enum.map(fn col_idx ->
          String.duplicate("─", cell_width) <>
            cond do
-             rem(col_idx + 1, box_size) == 0 and col_idx < grid_size - 1 -> "┴"
+             rem(col_idx + 1, order) == 0 and col_idx < grid_size - 1 -> "┴"
              col_idx < grid_size - 1 -> "─"
              true -> ""
            end
@@ -138,13 +140,14 @@ defmodule Sudoku.Visualizer do
       "╯"
   end
 
-  defp build_horizontal_separator(grid_size, box_size, cell_width) do
+  defp build_horizontal_separator(order, cell_width) do
+    grid_size = order * order
     "├" <>
       (0..(grid_size - 1)
        |> Enum.map(fn col_idx ->
          String.duplicate("─", cell_width) <>
            cond do
-             rem(col_idx + 1, box_size) == 0 and col_idx < grid_size - 1 -> "┼"
+             rem(col_idx + 1, order) == 0 and col_idx < grid_size - 1 -> "┼"
              col_idx < grid_size - 1 -> "─"
              true -> ""
            end
@@ -153,7 +156,8 @@ defmodule Sudoku.Visualizer do
       "┤"
   end
 
-  defp build_row_lines(row, _row_idx, grid_size, box_size, _cell_width) do
+  defp build_row_lines(row, _row_idx, order, _cell_width) do
+    grid_size = order * order
     # Convert row values to strings with proper padding
     cells =
       row
@@ -175,7 +179,7 @@ defmodule Sudoku.Visualizer do
          |> Enum.map(fn {cell, col_idx} ->
            cell <>
              cond do
-               rem(col_idx + 1, box_size) == 0 and col_idx < grid_size - 1 -> "│"
+               rem(col_idx + 1, order) == 0 and col_idx < grid_size - 1 -> "│"
                col_idx < grid_size - 1 -> " "
                true -> ""
              end
@@ -191,9 +195,10 @@ defmodule Sudoku.Visualizer do
 
   ## Parameters
   - `matrix`: List of {constraints, {r, c, n}} tuples from Algorithm X
-  - `grid_size`: Size of the sudoku grid
+  - `order`: Order of the sudoku grid (box size)
   """
-  def visualize_exact_cover_matrix(matrix, grid_size) do
+  def visualize_exact_cover_matrix(matrix, order) do
+    grid_size = order * order
     # Calculate total number of constraints (columns)
     total_constraints = 4 * grid_size * grid_size
 
@@ -223,13 +228,14 @@ defmodule Sudoku.Visualizer do
   end
 
   # Build combined content showing board and matrix side by side
-  defp build_combined_content(grid, matrix, grid_size, frame_num, total_frames) do
+  defp build_combined_content(grid, matrix, frame_num, total_frames) do
+    order = Utils.calculate_order(grid)
     # Build board content
-    board_lines = build_board_lines(grid, grid_size, Utils.calculate_box_size(grid_size), 3)
+    board_lines = build_board_lines(grid, order, 3)
     board_width = board_lines |> List.first() |> String.length()
 
     # Build matrix content
-    matrix_lines = build_matrix_lines(matrix, grid_size)
+    matrix_lines = build_matrix_lines(matrix, order)
 
     # Find maximum height
     max_height = max(length(board_lines), length(matrix_lines))
@@ -252,10 +258,11 @@ defmodule Sudoku.Visualizer do
   end
 
   # Build matrix lines for display
-  defp build_matrix_lines(matrix, grid_size) do
+  defp build_matrix_lines(matrix, order) do
     if matrix == [] do
       ["(empty matrix)"]
     else
+      grid_size = order * order
       total_constraints = 4 * grid_size * grid_size
 
       # Build binary matrix representation with triples

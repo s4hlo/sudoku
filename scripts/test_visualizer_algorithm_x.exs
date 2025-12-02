@@ -1,8 +1,8 @@
 puzzle = [
-  [1, 0, 0, 0],
   [0, 0, 0, 0],
-  [0, 0, 0, 0],
-  [0, 0, 0, 0]
+  [0, 0, 9, 0],
+  [0, 0, 0, 9],
+  [0, 9, 0, 0]
 ]
 
 history = Sudoku.solve_log(puzzle, Sudoku.AlgorithmX)

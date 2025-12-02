@@ -2,35 +2,37 @@ defmodule Sudoku.Backtracking do
   @moduledoc """
   Solves Sudoku puzzles using backtracking (depth-first search) algorithm.
   """
-  def solve(grid, grid_size, box_size) when is_list(grid) do
+  def solve(grid) when is_list(grid) do
+    order = Utils.calculate_order(grid)
     case Utils.find_empty_cell(grid) do
       nil -> grid
-      {row, col} -> try_values(grid, row, col, 1, grid_size, box_size)
+      {row, col} -> try_values(grid, row, col, 1, order)
     end
   end
 
-  defp try_values(_grid, _row, _col, num, grid_size, _box_size) when num > grid_size, do: nil
-  defp try_values(grid, row, col, num, grid_size, box_size) do
-    if Validator.valid_move?(grid, row, col, num, box_size) do
+  defp try_values(_grid, _row, _col, num, order) when num > order * order, do: nil
+  defp try_values(grid, row, col, num, order) do
+    if Validator.valid_move?(grid, row, col, num) do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
 
-      case solve(new_grid, grid_size, box_size) do
-        nil -> try_values(grid, row, col, num + 1, grid_size, box_size)
+      case solve(new_grid) do
+        nil -> try_values(grid, row, col, num + 1, order)
         solved -> solved
       end
     else
-      try_values(grid, row, col, num + 1, grid_size, box_size)
+      try_values(grid, row, col, num + 1, order)
     end
   end
 
-  def solve_log(grid, grid_size, box_size) when is_list(grid) do
-    case solve_with_history(grid, grid_size, box_size, []) do
+  def solve_log(grid) when is_list(grid) do
+    case solve_with_history(grid, []) do
       {nil, _history} -> nil
       {_solved, history} -> history
     end
   end
 
-  defp solve_with_history(grid, grid_size, box_size, history) do
+  defp solve_with_history(grid, history) do
+    order = Utils.calculate_order(grid)
     case Utils.find_empty_cell(grid) do
       nil ->
         # Solved - add final state and return grid and history (reversed to show progression)
@@ -38,29 +40,29 @@ defmodule Sudoku.Backtracking do
         {grid, Enum.reverse(final_history)}
 
       {row, col} ->
-        try_values_with_history(grid, row, col, 1, grid_size, box_size, history)
+        try_values_with_history(grid, row, col, 1, order, history)
     end
   end
 
-  defp try_values_with_history(_grid, _row, _col, num, grid_size, _box_size, history)
-       when num > grid_size do
+  defp try_values_with_history(_grid, _row, _col, num, order, history)
+       when num > order * order do
     {nil, history}
   end
-  defp try_values_with_history(grid, row, col, num, grid_size, box_size, history) do
-    if Validator.valid_move?(grid, row, col, num, box_size) do
+  defp try_values_with_history(grid, row, col, num, order, history) do
+    if Validator.valid_move?(grid, row, col, num) do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
       # Add snapshot only when a number is actually placed
       updated_history = [Utils.deep_copy(new_grid) | history]
 
-      case solve_with_history(new_grid, grid_size, box_size, updated_history) do
+      case solve_with_history(new_grid, updated_history) do
         {nil, final_history} ->
-          try_values_with_history(grid, row, col, num + 1, grid_size, box_size, final_history)
+          try_values_with_history(grid, row, col, num + 1, order, final_history)
 
         {solved, final_history} ->
           {solved, final_history}
       end
     else
-      try_values_with_history(grid, row, col, num + 1, grid_size, box_size, history)
+      try_values_with_history(grid, row, col, num + 1, order, history)
     end
   end
 end
