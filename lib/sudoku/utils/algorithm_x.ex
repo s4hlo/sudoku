@@ -1,4 +1,4 @@
-defmodule Utils.AlgorithmX do
+defmodule Sudoku.Utils.AlgorithmX do
   # Build binary matrix A where:
   # - Each row represents a choice (placing number n in cell r,c)
   # - Each column represents a constraint
@@ -51,7 +51,7 @@ defmodule Utils.AlgorithmX do
 
   # Convert solution (list of {r, c, n} tuples) back to grid format
   def solution_to_grid(solution, original_grid) do
-    order = Utils.calculate_order(original_grid)
+    order = Sudoku.Utils.calculate_order(original_grid)
     grid_size = order * order
     # Create a map from (r, c) to n
     solution_map =

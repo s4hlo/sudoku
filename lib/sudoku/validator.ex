@@ -1,6 +1,6 @@
-defmodule Validator do
+defmodule Sudoku.Validator do
   def valid_initial_grid?(grid) do
-    order = Utils.calculate_order(grid)
+    order = Sudoku.Utils.calculate_order(grid)
     grid_size = order * order
     # Check each filled cell to ensure it doesn't violate constraints
     Enum.all?(0..(grid_size - 1), fn row ->
@@ -13,7 +13,7 @@ defmodule Validator do
         else
           # Temporarily remove this cell's value to check if placing it is valid
           temp_grid = remove_cell_value(grid, row, col)
-          Validator.valid_move?(temp_grid, row, col, value)
+          Sudoku.Validator.valid_move?(temp_grid, row, col, value)
         end
       end)
     end)
@@ -53,7 +53,7 @@ defmodule Validator do
   end
 
   defp valid_in_box?(grid, row, col, num) do
-    order = Utils.calculate_order(grid)
+    order = Sudoku.Utils.calculate_order(grid)
     box_start_row = div(row, order) * order
     box_start_col = div(col, order) * order
 

@@ -8,7 +8,7 @@ defmodule Sudoku do
   @default_solver Sudoku.Backtracking
 
   defp validate_and_solve(grid, solver, :solve) do
-    if Validator.valid_initial_grid?(grid) do
+    if Sudoku.Validator.valid_initial_grid?(grid) do
       solver.solve(grid)
     else
       nil
@@ -16,7 +16,7 @@ defmodule Sudoku do
   end
 
   defp validate_and_solve(grid, solver, :solve_log) do
-    if Validator.valid_initial_grid?(grid) do
+    if Sudoku.Validator.valid_initial_grid?(grid) do
       solver.solve_log(grid)
     else
       nil

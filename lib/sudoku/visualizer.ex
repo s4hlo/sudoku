@@ -229,7 +229,7 @@ defmodule Sudoku.Visualizer do
 
   # Build combined content showing board and matrix side by side
   defp build_combined_content(grid, matrix, frame_num, total_frames) do
-    order = Utils.calculate_order(grid)
+    order = Sudoku.Utils.calculate_order(grid)
     # Build board content
     board_lines = build_board_lines(grid, order, 3)
     board_width = board_lines |> List.first() |> String.length()

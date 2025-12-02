@@ -52,7 +52,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(@valid_9x9_puzzle)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
     end
 
     test "returns nil for invalid puzzle" do
@@ -71,7 +71,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(@valid_4x4_puzzle)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
       assert length(solution) == 4
       assert length(hd(solution)) == 4
     end
@@ -111,7 +111,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(puzzle_with_blanks)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
       assert length(solution) == 16
       assert length(hd(solution)) == 16
     end
@@ -122,7 +122,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(@valid_9x9_puzzle, Sudoku.Backtracking)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
     end
 
     test "returns nil for invalid puzzle" do
@@ -141,7 +141,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(@valid_4x4_puzzle, Sudoku.Backtracking)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
       assert length(solution) == 4
       assert length(hd(solution)) == 4
     end
@@ -152,7 +152,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(@valid_9x9_puzzle, Sudoku.AlgorithmX)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
     end
 
     test "returns nil for invalid puzzle" do
@@ -172,7 +172,7 @@ defmodule SudokuTest do
       solution = Sudoku.solve(puzzle, Sudoku.AlgorithmX)
 
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
       assert length(solution) == 4
       assert length(hd(solution)) == 4
     end
@@ -190,7 +190,7 @@ defmodule SudokuTest do
 
       solution = Sudoku.solve(grid)
       assert not is_nil(solution)
-      assert Validator.is_valid_solution?(solution)
+      assert Sudoku.Validator.is_valid_solution?(solution)
     end
 
     test "reads valid 4x4 puzzle file" do

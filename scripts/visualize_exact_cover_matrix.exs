@@ -7,6 +7,6 @@ puzzle = [
 
 order = trunc(:math.sqrt(length(puzzle)))
 
-matrix = Utils.AlgorithmX.build_exact_cover_matrix(puzzle, order)
+matrix = Sudoku.Utils.AlgorithmX.build_exact_cover_matrix(puzzle, order)
 
 Sudoku.Visualizer.visualize_exact_cover_matrix(matrix, order)

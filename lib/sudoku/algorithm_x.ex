@@ -6,19 +6,19 @@ defmodule Sudoku.AlgorithmX do
   """
 
   def solve(grid) when is_list(grid) do
-    order = Utils.calculate_order(grid)
-    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, order)
+    order = Sudoku.Utils.calculate_order(grid)
+    matrix = Sudoku.Utils.AlgorithmX.build_exact_cover_matrix(grid, order)
 
     case algorithm_x(matrix, []) do
       nil -> nil
-      solution -> Utils.AlgorithmX.solution_to_grid(solution, grid)
+      solution -> Sudoku.Utils.AlgorithmX.solution_to_grid(solution, grid)
     end
   end
 
   def solve_log(grid) when is_list(grid) do
-    order = Utils.calculate_order(grid)
-    matrix = Utils.AlgorithmX.build_exact_cover_matrix(grid, order)
-    initial_history = [{Utils.deep_copy(grid), matrix}]
+    order = Sudoku.Utils.calculate_order(grid)
+    matrix = Sudoku.Utils.AlgorithmX.build_exact_cover_matrix(grid, order)
+    initial_history = [{Sudoku.Utils.deep_copy(grid), matrix}]
 
     case algorithm_x_with_history(matrix, [], grid, initial_history) do
       nil -> nil
@@ -67,8 +67,8 @@ defmodule Sudoku.AlgorithmX do
     # Step 1: If A is empty, the problem is solved; terminate successfully.
     if matrix == [] do
       # Convert final solution to grid and add to history
-      final_grid = Utils.AlgorithmX.solution_to_grid(partial_solution, original_grid)
-      final_history = [{Utils.deep_copy(final_grid), []} | history]
+      final_grid = Sudoku.Utils.AlgorithmX.solution_to_grid(partial_solution, original_grid)
+      final_history = [{Sudoku.Utils.deep_copy(final_grid), []} | history]
       {partial_solution, final_history}
     else
       # Step 2: Choose a column, c (deterministically).
@@ -176,8 +176,8 @@ defmodule Sudoku.AlgorithmX do
     reduced_matrix = reduce_matrix(matrix, constraints_r)
 
     # Convert partial solution to grid and add to history with reduced matrix
-    current_grid = Utils.AlgorithmX.solution_to_grid(new_partial_solution, original_grid)
-    updated_history = [{Utils.deep_copy(current_grid), reduced_matrix} | history]
+    current_grid = Sudoku.Utils.AlgorithmX.solution_to_grid(new_partial_solution, original_grid)
+    updated_history = [{Sudoku.Utils.deep_copy(current_grid), reduced_matrix} | history]
 
     # Step 6: Repeat this algorithm recursively on the reduced matrix A
     case algorithm_x_with_history(

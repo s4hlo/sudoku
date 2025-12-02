@@ -3,8 +3,8 @@ defmodule Sudoku.Backtracking do
   Solves Sudoku puzzles using backtracking (depth-first search) algorithm.
   """
   def solve(grid) when is_list(grid) do
-    order = Utils.calculate_order(grid)
-    case Utils.find_empty_cell(grid) do
+    order = Sudoku.Utils.calculate_order(grid)
+    case Sudoku.Utils.find_empty_cell(grid) do
       nil -> grid
       {row, col} -> try_values(grid, row, col, 1, order)
     end
@@ -12,7 +12,7 @@ defmodule Sudoku.Backtracking do
 
   defp try_values(_grid, _row, _col, num, order) when num > order * order, do: nil
   defp try_values(grid, row, col, num, order) do
-    if Validator.valid_move?(grid, row, col, num) do
+    if Sudoku.Validator.valid_move?(grid, row, col, num) do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
 
       case solve(new_grid) do
@@ -32,11 +32,11 @@ defmodule Sudoku.Backtracking do
   end
 
   defp solve_with_history(grid, history) do
-    order = Utils.calculate_order(grid)
-    case Utils.find_empty_cell(grid) do
+    order = Sudoku.Utils.calculate_order(grid)
+    case Sudoku.Utils.find_empty_cell(grid) do
       nil ->
         # Solved - add final state and return grid and history (reversed to show progression)
-        final_history = [Utils.deep_copy(grid) | history]
+        final_history = [Sudoku.Utils.deep_copy(grid) | history]
         {grid, Enum.reverse(final_history)}
 
       {row, col} ->
@@ -49,10 +49,10 @@ defmodule Sudoku.Backtracking do
     {nil, history}
   end
   defp try_values_with_history(grid, row, col, num, order, history) do
-    if Validator.valid_move?(grid, row, col, num) do
+    if Sudoku.Validator.valid_move?(grid, row, col, num) do
       new_grid = put_in(grid, [Access.at(row), Access.at(col)], num)
       # Add snapshot only when a number is actually placed
-      updated_history = [Utils.deep_copy(new_grid) | history]
+      updated_history = [Sudoku.Utils.deep_copy(new_grid) | history]
 
       case solve_with_history(new_grid, updated_history) do
         {nil, final_history} ->

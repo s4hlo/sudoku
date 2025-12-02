@@ -1,4 +1,4 @@
-defmodule Utils do
+defmodule Sudoku.Utils do
   def deep_copy(grid) do
     Enum.map(grid, fn row -> Enum.map(row, & &1) end)
   end
