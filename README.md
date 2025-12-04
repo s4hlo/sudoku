@@ -4,14 +4,33 @@ Solver de Sudoku em Elixir que implementa dois algoritmos diferentes para resolv
 
 ## Algoritmos
 
+Implementações de algoritmos para resolver quebra-cabeças Sudoku.
+
 - **Backtracking**: Busca em profundidade com backtracking (padrão)
 - **Algorithm X**: Algoritmo X de Donald Knuth para problemas de exact cover
 
+
+## Documentação
+
+Gera documentação HTML usando ExDoc a partir dos comentários no código.
+
+Para gerar a documentação, execute:
+
+```bash
+mix docs
+```
+
+A documentação será gerada na pasta `doc/`. Para visualizar, abra o arquivo `doc/index.html` no seu navegador.
+
 ## Requisitos
+
+Dependências e versões necessárias para executar o projeto.
 
 - Elixir ~> 1.17
 
 ## Instalação
+
+Passos para configurar o projeto localmente.
 
 Clone o repositório e instale as dependências:
 
@@ -21,7 +40,9 @@ mix deps.get
 
 ## Scripts
 
-O projeto inclui vários scripts de exemplo e teste na pasta `scripts/`:
+Scripts de exemplo e teste disponíveis na pasta `scripts/`.
+
+O projeto inclui vários scripts na pasta `scripts/`:
 
 - `example_backtracking.exs` - Exemplo usando backtracking
 - `example_algorithm_x.exs` - Exemplo usando Algorithm X
@@ -31,6 +52,8 @@ O projeto inclui vários scripts de exemplo e teste na pasta `scripts/`:
 - `visualize_exact_cover_matrix.exs` - Visualiza matriz de exact cover
 
 ### Executar Scripts
+
+Formas de executar os scripts disponíveis no projeto.
 
 Use os aliases do Mix:
 
@@ -51,6 +74,8 @@ mix run scripts/example_algorithm_x.exs
 ```
 
 ## Uso
+
+Exemplos de como usar o solver de Sudoku no código.
 
 ```elixir
 # Grid representado como lista de listas (0 = célula vazia)
@@ -73,8 +98,21 @@ history = Sudoku.solve_log(grid)
 
 ## Testes
 
+Executa a suíte de testes do projeto.
+
 ```bash
 mix test
 ```
 
+## Uso de IA
+
+Registro de contribuições feitas com auxílio de IA durante o desenvolvimento.
+
+- Criação da documentação para gerar o exDoc
+- Criação de massa de teste
+- Alguns ajustes nas funções do módulo de Visualizer referentes a:
+    - adicionar bordas estilizadas no tabuleiro
+    - animar corretamente a sequência de tabuleiros no terminal
+    - animação em paralelo do board com a matriz de cobertura lado a lado no caso do Algorithm X
+    
 by Rafael Magno 
