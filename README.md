@@ -76,3 +76,5 @@ history = Sudoku.solve_log(grid)
 ```bash
 mix test
 ```
+
+by Rafael Magno 
